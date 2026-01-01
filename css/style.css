@@ -1,0 +1,257 @@
+@import url(https://fonts.googleapis.com/css?family=Poppins:100,100italic,200,200italic,300,300italic,regular,italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic);
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  transition: 0.5s linear;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --body-color: #fff;
+    --container-background: #fff;
+    --btn-color: #fff;
+    --btn-bg: #ffc53a;
+
+    --toast-bg: #fff;
+    --toast-shadow: rgba(0, 0, 0, 0.1);
+  }
+  body {
+    color-scheme: light;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --body-color: #f7eedb;
+    --container-background: #241d19;
+    --btn-color: #fff;
+    --toast-bg: #2a231d;
+    --toast-shadow: rgba(255, 255, 255, 0.06);
+  }
+  body {
+    color-scheme: dark;
+  }
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  --body-background: #ffc226ff;
+  --btn-bg: transparent;
+
+  background-color: var(--body-background);
+  color: var(--body-color);
+  font-family: "Poppins";
+}
+
+.offscreen {
+  position: absolute !important;
+  width: 1px !important;
+  margin: -1px !important;
+  height: 1px !important;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+:focus {
+  border: 1px solid rgba(100, 149, 237, 0.75);
+  outline: 1px solid rgba(100, 149, 237, 0.75);
+  box-shadow: 0 0 8px rgba(100, 149, 237, 0.75);
+}
+
+.fa {
+  font-size: 1.25rem;
+}
+
+h1 {
+  text-align: center;
+}
+
+.container {
+  background: var(--container-background);
+  padding: 2rem;
+  border-radius: 15px;
+  height: auto;
+  width: min(60%, 500px);
+}
+
+form {
+  margin: 1rem 0 1rem 0;
+  position: relative;
+}
+
+form :is(select, input, button, fieldset) {
+  width: 100%;
+  border: none;
+  outline: none;
+  border-radius: 0.75rem;
+  font-family: inherit;
+}
+
+form button.refreshRates {
+  position: absolute;
+  top: -2%;
+  right: 2%;
+  width: fit-content;
+  background: transparent;
+}
+
+form button.refreshRates.loading {
+  animation: rotate 0.5s ease-out infinite;
+}
+
+form button.refreshRates .fa {
+  font-size: 1rem;
+}
+
+form input {
+  border: 1px solid lightgray;
+  font-size: 1rem;
+  height: 3rem;
+  padding-left: 1rem;
+}
+
+.dropdown {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-flow: row wrap;
+  gap: 1em;
+  margin-top: 1rem;
+}
+
+.dropdown button.swap-btn {
+  background: var(--btn-bg);
+  width: fit-content;
+  padding: 1rem;
+  color: var(--btn-color);
+}
+
+.select-container img {
+  max-width: 2.5rem;
+}
+
+.select-container {
+  display: flex;
+  width: 8rem;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0.5rem;
+  border: 1px solid lightgray;
+}
+
+.select-container select {
+  font-size: 1rem;
+  border-radius: 0.5rem;
+
+  width: 100%;
+  padding: 1rem;
+}
+
+.msg {
+  margin: 2rem 0 0 0;
+  text-align: center;
+}
+
+.toastBox {
+  position: absolute;
+  bottom: 10px;
+  right: 0;
+  display: flex;
+  align-self: flex-end;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 20px;
+  max-height: 30%;
+}
+
+.toast {
+  width: 400px;
+  background: var(--toast-bg);
+  font-weight: 500;
+  margin: 15px 0;
+  box-shadow: 0 0 20px var(--toast-shadow);
+  display: flex;
+  align-items: center;
+  padding: 20px 5px;
+  position: relative;
+  transform: translateX(100%);
+  animation: moveLeft 0.5s linear forwards;
+}
+
+@keyframes moveLeft {
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.toast::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 5px;
+  animation: anim 6s linear forwards;
+}
+
+.toast.invalid::after {
+  background: orange;
+}
+
+.toast.error::after {
+  background: red;
+}
+
+.toast.success::after {
+  background: green;
+}
+
+.toast .fa {
+  margin: 0 10px;
+  font-size: 1.25rem;
+}
+
+.fa.fa-circle-check {
+  color: green;
+}
+
+.fa.fa-circle-xmark {
+  color: red;
+}
+.fa.fa-circle-exclamation {
+  color: orange;
+}
+
+@keyframes anim {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .container {
+    width: 90%;
+  }
+  .dropdown {
+    flex-flow: column nowrap;
+    justify-content: center;
+  }
+}

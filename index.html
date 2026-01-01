@@ -1,0 +1,88 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js" lang="en"> <![endif]-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Currency Converter</title>
+    <meta
+      name="description"
+      content="This is a subset of the Gabriel Bolarinwa Portfolio. This is a currency converter that collects current currency data from a trusted API to give you realtime information"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="fontawesome6/pro/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!--[if lt IE 7]>
+      <p class="browsehappy">
+        You are using an <strong>outdated</strong> browser. Please
+        <a href="#">upgrade your browser</a> to improve your experience.
+      </p>
+    <![endif]-->
+    <main class="container">
+      <h1>Currency Converter</h1>
+      <form>
+        <button
+          class="refreshRates"
+          title="Refresh Currency Data"
+          aria-label="Refresh Currency Data"
+          type="button"
+          onclick="refreshRates()"
+          aria-busy="false"
+        >
+          <span class="fa fa-arrows-rotate"></span>
+        </button>
+        <div class="amount">
+          <label for="amount">Enter Amount</label>
+          <input
+            type="number"
+            min="1"
+            name="amount"
+            id="amount"
+            value="1"
+            autocomplete="off"
+          />
+        </div>
+        <fieldset>
+          <legend class="offscreen">Select Conversion Currencies</legend>
+          <div class="dropdown">
+            <div class="from">
+              <label for="from" id="fromLabel">From</label>
+              <div class="select-container">
+                <select
+                  name="from"
+                  id="from"
+                  aria-describedby="#fromLabel"
+                ></select>
+              </div>
+            </div>
+            <button
+              class="swap-btn"
+              title="Swap Currencies"
+              aria-label="Swap Currencies"
+              type="button"
+              onclick="swapCurrencies()"
+            >
+              <span class="fa fa-arrow-right-arrow-left"></span>
+            </button>
+            <div class="to">
+              <label for="to" id="toLabel">To</label>
+              <div class="select-container">
+                <select name="to" id="to" aria-describedby="#toLabel"></select>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+      <div class="msg" aria-live="polite">1USD = 80INR</div>
+    </main>
+    <div class="toastBox" id="toastBox" aria-live="polite"></div>
+
+    <script src="js/codes.js"></script>
+    <script src="js/script.js" async defer></script>
+  </body>
+</html>
