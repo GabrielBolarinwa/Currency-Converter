@@ -6,6 +6,8 @@ const toCurr = document.querySelector(".to select");
 const msg = document.querySelector(".msg");
 let amount = document.querySelector(".amount input");
 let currencyData = {};
+const toastBox = document.getElementById("toastBox");
+const spinner = document.querySelector(".refreshRates .fa.fa-arrows-rotate");
 
 async function init() {
   for (const select of dropdowns) {
@@ -37,12 +39,25 @@ async function init() {
         handleRateExchange(currCode, key);
       }
     } else {
-      handleRateExchange(currCode, key);
+      spinner.classList.add("fa-spin");
+
+      spinner.ariaBusy = true;
+
+      await handleRateExchange(currCode, key);
+      spinner.classList.remove("fa-spin");
+
+      spinner.ariaBusy = false;
     }
   }
+  setLocalStorageItems();
+  getExchangeRate();
+}
+
+function setLocalStorageItems() {
   if (localStorage.getItem("currentAmount")) {
     amount.value = Number(localStorage.getItem("currentAmount"));
   }
+
   if (localStorage.getItem("fromCurr")) {
     fromCurr.value = localStorage.getItem("fromCurr");
   }
@@ -51,6 +66,7 @@ async function init() {
     toCurr.value = localStorage.getItem("toCurr");
   }
 }
+
 navigator.onLine
   ? init()
   : localStorage.getItem("usd")
@@ -126,10 +142,10 @@ function getExchangeRate() {
   const fromCode = fromCurr.value;
   const toCode = toCurr.value;
   const rate = getCachedRate(fromCode, toCode);
-
   if (rate === null) {
     showToast(
       "Exchange rate not available, please connect to the internet and try again.",
+      "error",
     );
     return;
   }
@@ -144,11 +160,9 @@ function getExchangeRate() {
   ).format(finalAmount.toFixed(6))} ${toCode.toUpperCase()}`;
   msg.classList.remove("error");
 }
-getExchangeRate();
 
 const currencyForm = document.querySelector("form");
 async function refreshRates() {
-  const spinner = document.querySelector(".refreshRates .fa.fa-arrows-rotate");
   spinner.classList.add("fa-spin");
   spinner.ariaBusy = true;
   if (amount.value === "" || amount.value < 1) {
@@ -159,6 +173,7 @@ async function refreshRates() {
     getExchangeRate();
   } finally {
     spinner.classList.remove("fa-spin");
+    spinner.ariaBusy = false;
   }
 }
 
@@ -200,7 +215,6 @@ function swapCurrencies() {
   handleFormInput();
 }
 
-const toastBox = document.getElementById("toastBox");
 function showToast(message, id) {
   let toast = document.createElement("div");
   toast.classList.add("toast");
