@@ -166,19 +166,21 @@ form input {
   right: 0;
   display: flex;
   align-self: flex-end;
+  align-items: flex-end;
   flex-direction: column;
   overflow: hidden;
   padding: 20px;
-  max-height: 30%;
+  max-height: 100px;
 }
 
 .toast {
-  width: 400px;
+  width: 100%;
   background: var(--toast-bg);
   font-weight: 500;
   margin: 15px 0;
   box-shadow: 0 0 20px var(--toast-shadow);
   display: flex;
+  height: auto;
   align-items: center;
   padding: 20px 5px;
   position: relative;
