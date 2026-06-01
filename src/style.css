@@ -445,6 +445,7 @@ form {
   font-family: var(--font-mono);
   font-size: clamp(1rem, 1rem + 2vw, 3.5rem);
   min-height: 2rem;
+  padding: 1rem;
 }
 
 .form-section {
@@ -460,23 +461,42 @@ form {
   justify-content: space-between;
   gap: 1em;
   .amount {
-    width: min(100%, 8rem);
+    min-width: 8rem;
+    max-width: 55%;
   }
   input {
     border-radius: 0.5rem;
-    width: 100%;
-    padding-inline: 1rem;
+    max-width: 100%;
     border-radius: 0.5rem;
     background: transparent;
   }
   output {
     border-radius: 0.5rem;
-    width: 100%;
-    padding-inline: 1rem;
+    max-width: 100%;
     line-height: 2rem;
+    overflow-x: auto;
     display: block;
     border-radius: 0.5rem;
     background: transparent;
+    .skeleton {
+      position: relative;
+      background: #e0e0e045;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      height: 4rem;
+      width: 10rem;
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.4)
+        );
+        animation: shimmer 1.5s infinite;
+      }
+    }
   }
   :is(.from, .to) {
     width: min(100%, 8rem);
@@ -605,6 +625,17 @@ button.refreshRates span {
   }
 }
 
+footer {
+  border-top: 1px solid var(--color-border);
+  margin-inline: auto;
+  text-align: center;
+  padding-block: var(--space-4);
+  background: #f5f7f710;
+  #lastUpdated {
+    color: var(--color-accent-primary);
+  }
+}
+
 @keyframes anim {
   0% {
     width: 100%;
@@ -618,5 +649,14 @@ button.refreshRates span {
   * {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
   }
 }

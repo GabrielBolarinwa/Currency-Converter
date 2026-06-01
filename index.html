@@ -145,8 +145,9 @@
                       id="display"
                       class="displayOutput"
                       aria-live="polite"
-                      >Loading...</output
                     >
+                      <div class="skeleton"></div>
+                    </output>
                   </div>
                   <div class="to">
                     <label for="to" class="offscreen" id="toLabel">To</label>
@@ -183,6 +184,7 @@
       </section>
     </main>
     <div class="toastBox" id="toastBox" aria-live="polite"></div>
+    <footer>Rates last updated <span id="lastUpdated"></span></footer>
     <script type="module" src="/src/script.js" defer></script>
   </body>
 </html>

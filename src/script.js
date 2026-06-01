@@ -31,9 +31,10 @@ const toastBox = document.getElementById("toastBox");
 const pairButtons = document.querySelectorAll(".pairs .pair-buttons");
 const swapCurrencyButton = document.getElementById("swapCurrency");
 const refreshRatesButton = document.getElementById("refreshRates");
+const lastUpdated = document.getElementById("lastUpdated");
 let success = 0;
 let fails = 0;
-let total = 0;
+let total = Object.keys(countryList).length;
 async function init() {
   for (const select of dropdowns) {
     for (const currCode in countryList) {
@@ -51,8 +52,34 @@ async function init() {
     }
   }
 
-  for (const currCode in countryList) {
-    if (!Object.hasOwn(countryList, currCode)) continue;
+  await setLocalStorageItems();
+  let initialCurrencies = [fromCurr.value, toCurr.value];
+  for (const button of pairButtons) {
+    const pairRateText = button.querySelector("span");
+    const pairRateFrom = pairRateText.dataset.from;
+    const pairRateTo = pairRateText.dataset.to;
+    if (!initialCurrencies.includes(pairRateFrom)) {
+      initialCurrencies.push(pairRateFrom);
+    }
+    if (!initialCurrencies.includes(pairRateTo)) {
+      initialCurrencies.push(pairRateTo);
+    }
+    button.addEventListener("click", async () => {
+      Array.from(fromCurr.options).map((option) => {
+        if (option.value === pairRateFrom) {
+          option.selected = true;
+          handleFormInput();
+        }
+      });
+      Array.from(toCurr.options).map((option) => {
+        if (option.value === pairRateTo) {
+          option.selected = true;
+          handleFormInput();
+        }
+      });
+    });
+  }
+  for (const currCode of initialCurrencies) {
     const key = `currency-${currCode}`;
     if (localStorage.getItem(key)) {
       currencyData[currCode.toLowerCase()] = JSON.parse(
@@ -75,9 +102,7 @@ async function init() {
 
       refreshRatesButton.ariaBusy = false;
     }
-    total++;
   }
-
   success > 0 &&
     showToast(`${success} out of ${total} currencies now available`, "success");
   setTimeout(() => {
@@ -88,25 +113,7 @@ async function init() {
       );
   }, 6000);
   document.getElementById("totalCurrencies").textContent = total;
-  for (const button of pairButtons) {
-    button.addEventListener("click", () => {
-      const pairRateText = button.querySelector("span");
 
-      Array.from(fromCurr.options).map((option) => {
-        if (option.value === pairRateText.dataset.from) {
-          option.selected = true;
-          handleFormInput();
-        }
-      });
-      Array.from(toCurr.options).map((option) => {
-        if (option.value === pairRateText.dataset.to) {
-          option.selected = true;
-          handleFormInput();
-        }
-      });
-    });
-  }
-  await setLocalStorageItems();
   await getExchangeRate();
   if (document.readyState === "complete") {
     document.fonts.ready.then(() => {
@@ -123,6 +130,40 @@ async function init() {
   }
 }
 
+function lastFetchedTimeText() {
+  if (localStorage.getItem("ratesFetchedAt")) {
+    const lastFetchedTime =
+      (Date.now() - localStorage.getItem("ratesFetchedAt")) / 1000;
+    let metric = `just now`;
+    if (lastFetchedTime >= 30) {
+      metric = `${Math.floor(lastFetchedTime)} seconds ago`;
+    }
+    if (lastFetchedTime >= 60) {
+      metric = `${Math.floor(lastFetchedTime / 60)} minutes ago`;
+    }
+    if (lastFetchedTime >= 60 * 60) {
+      metric = `${Math.floor(lastFetchedTime / 3600)} hours ago`;
+    }
+    if (lastFetchedTime >= 60 * 60 * 24) {
+      metric = `${Math.floor(lastFetchedTime / 86400)} days ago`;
+    }
+    if (lastFetchedTime >= 60 * 60 * 24 * 30.44) {
+      metric = `${Math.floor(lastFetchedTime / (60 * 60 * 24 * 30.44))} months ago`;
+    }
+    if (lastFetchedTime >= 60 * 60 * 24 * 30.44 * 12) {
+      metric = `${Math.floor(lastFetchedTime / (60 * 60 * 24 * 30.44 * 12))} ${Math.floor(lastFetchedTime / (60 * 60 * 24 * 30.44 * 12)) > 1 ? "years" : "year"} ago`;
+    }
+    return metric;
+  } else {
+    return null;
+  }
+}
+
+function setLastUpdated() {
+  lastUpdated.textContent = lastFetchedTimeText() || "...";
+}
+setLastUpdated();
+
 function setLocalStorageItems() {
   if (localStorage.getItem("currentAmount")) {
     amount.value = Number(localStorage.getItem("currentAmount"));
@@ -137,20 +178,25 @@ function setLocalStorageItems() {
   }
 }
 
-navigator.onLine
-  ? init()
-  : localStorage.getItem("usd")
-    ? showToast("You are offline and will use cached currency data", "warning")
-    : showToast(
-        "You are offline and there is no cached data, please connect to the internet to get realtime values",
-        "warning",
-      );
+if (!navigator.onLine) {
+  if (localStorage.getItem(fromCurr.value)) {
+    showToast("You are offline and will use cached currency data", "warning");
+  } else {
+    showToast(
+      "No cached data available, please connect to the internet for realtime data",
+      "warning",
+    );
+  }
+}
+
+init();
 
 async function handleRateExchange(currCode, key) {
   try {
     const data = await fetchRates(currCode.toLowerCase());
     if (data !== null) {
       localStorage.setItem(key, JSON.stringify(data));
+      localStorage.setItem("ratesFetchedAt", Date.now());
       currencyData[currCode.toLowerCase()] = data;
       success++;
     }
@@ -167,9 +213,9 @@ async function getAllRates() {
   for (let currCode in countryList) {
     if (!Object.hasOwn(countryList, currCode)) continue;
     const key = `currency-${currCode}`;
-    promises.push(await handleRateExchange(currCode, key));
+    promises.push(handleRateExchange(currCode, key));
   }
-  Promise.all(promises);
+  await Promise.all(promises);
   success > 0 &&
     showToast(
       `${success} ${success > 1 ? "currencies" : "currency"} now available`,
@@ -216,6 +262,7 @@ function getExchangeRate() {
   const fromCode = fromCurr.value;
   const toCode = toCurr.value;
   const rate = getCachedRate(fromCode, toCode);
+  display.innerHTML = "";
   if (rate === null) {
     showToast(
       "Exchange rate not available, please connect to the internet and try again.",
@@ -238,11 +285,15 @@ function getExchangeRate() {
     }
   }
   const finalAmount = amount.value * rate;
-  const singleToCurrency = 1 * getCachedRate(fromCode, toCode);
-  const singleFromCurrency = 1 * getCachedRate(toCode, fromCode);
+  const singleToCurrency = rate;
+  if (getCachedRate(toCode, fromCode)) {
+    const singleFromCurrency = 1 * getCachedRate(toCode, fromCode);
+    msgFromText.textContent = `1 ${toCode.toUpperCase()} = ${singleFromCurrency.toFixed(4)} ${fromCode.toUpperCase()}`;
+  } else {
+    msgFromText.textContent = `1 ${toCode.toUpperCase()} = Error with rate, refresh and try again`;
+  }
   display.innerText = `${formatNumber(finalAmount)}`;
-  msgToText.textContent = `1 ${fromCode.toUpperCase()} = ${singleToCurrency.toFixed(2)} ${toCode.toUpperCase()}`;
-  msgFromText.textContent = `1 ${toCode.toUpperCase()} = ${singleFromCurrency.toFixed(2)} ${fromCode.toUpperCase()}`;
+  msgToText.textContent = `1 ${fromCode.toUpperCase()} = ${singleToCurrency.toFixed(4)} ${toCode.toUpperCase()}`;
 }
 
 function formatNumber(number) {
@@ -288,10 +339,12 @@ function handleFormElementsChange(e) {
   localStorage.setItem("toCurr", toCurr.value);
 }
 
+let inputTimer;
 amount.addEventListener("input", (e) => {
   e.preventDefault();
   localStorage.setItem("currentAmount", amount.value);
-  setTimeout(() => {
+  clearTimeout(inputTimer);
+  inputTimer = setTimeout(() => {
     handleFormInput();
   }, 300);
 });
